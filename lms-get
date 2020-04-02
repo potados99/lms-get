@@ -1,9 +1,17 @@
 #!/bin/bash
 
-
+# Args
 URL=""
 COOKIE=""
 OUTPUT=""
+
+# Configs
+EXT="png"
+
+# Globals
+FRAME_URL=""
+CONTENT_ID=""
+CONTENT_BASE_URL=""
 
 function parse_args() {
 	# GNU getopt
@@ -49,9 +57,41 @@ function usage() {
 	exit 1
 }
 
+function parse_frame_url() {
+	FRAME_URL=$(curl -b "MoodleSession=$COOKIE" $URL | grep "iframe_document" | grep -oEi "http://[\.a-zA-Z0-9\/\?=-_&]+")
+}
+
+function parse_content_id() {
+	CONTENT_ID=$(echo $FRAME_URL | grep -oEi "fn=[a-z0-9]+" | awk -F '=' '{print $2}')
+	echo $CONTENT_ID
+}
+
+function generate_content_base_url() {
+# http://cyber.inu.ac.kr/ubion_document/7307765f0f0a35dfa6ef70c1a3dd6d46cdc264b8/7307765f0f0a35dfa6ef70c1a3dd6d46cdc264b8.files/26.png
+	CONTENT_BASE_URL="http://cyber.inu.ac.kr/ubion_document/$CONTENT_ID/$CONTENT_ID.files"
+}
+
+function download_contents() {
+	mkdir -p $OUTPUT
+
+	file_number=1
+	url="$CONTENT_BASE_URL/$file_number.$EXT"
+	status_code=$(curl -o /dev/null -w "%{http_code}" $url)
+
+	while [ $status_code -eq 200 ]; do
+		curl -o $OUTPUT/$file_number.$EXT $url
+		
+		file_number=$((file_number + 1))
+		url="$CONTENT_BASE_URL/$file_number.$EXT"
+		status_code=$(curl -o /dev/null -w "%{http_code}" $url)
+	done
+}
+
 parse_args $@
 assert_args
 
-echo $URL
-echo $COOKIE
-echo $OUTPUT
+parse_frame_url
+parse_content_id
+
+generate_content_base_url
+download_contents
