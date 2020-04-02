@@ -105,7 +105,7 @@ function download_contents() {
 	status_code=$(curl -sS -o /dev/null -w "%{http_code}" $url)
 	
 	while [ $status_code -eq 200 ]; do
-		curl -sS -o $OUTPUT/$file_number.$(get_ext) $url
+		curl -sS -o $OUTPUT/page$file_number.$(get_ext) $url
 		
 		file_number=$((file_number + 1))
 		url=$(get_url $file_number)
