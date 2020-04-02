@@ -29,6 +29,25 @@ function parse_args() {
 	done
 }
 
+function read_args_if_not_given() {
+	OK=true
+	
+	if [ "$URL" = "" ]; then
+		echo -n "Lecture URL: "
+		read URL
+	fi
+
+	if [ "$COOKIE" = "" ]; then
+		echo -n "Cookie(MoodleSession): "
+		read COOKIE
+	fi
+
+	if [ "$OUTPUT" = "" ]; then
+		echo -n "Output directory: "
+		read OUTPUT
+	fi
+}
+
 function assert_args() {
 	OK=true
 	
@@ -67,7 +86,6 @@ function parse_content_id() {
 }
 
 function generate_content_base_url() {
-# http://cyber.inu.ac.kr/ubion_document/7307765f0f0a35dfa6ef70c1a3dd6d46cdc264b8/7307765f0f0a35dfa6ef70c1a3dd6d46cdc264b8.files/26.png
 	CONTENT_BASE_URL="http://cyber.inu.ac.kr/ubion_document/$CONTENT_ID/$CONTENT_ID.files"
 }
 
@@ -88,6 +106,7 @@ function download_contents() {
 }
 
 parse_args $@
+read_args_if_not_given
 assert_args
 
 parse_frame_url
