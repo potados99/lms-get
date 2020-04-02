@@ -5,10 +5,13 @@ URL=""
 TOKEN=""
 OUTPUT=""
 
+# Config 
+BASE_URL="http://cyber.inu.ac.kr/mod/ubfile/viewer.php?id="
+
 # Globals
 FRAME_URL=""
 ORIGIN_EXT=""
-CONTENT_ID=""
+CONTENT_TOKEN=""
 CONTENT_BASE_URL=""
 
 function parse_args() {
@@ -20,7 +23,7 @@ function parse_args() {
 		case "$1" in
 			-t | --token ) shift; TOKEN="$1" ;;
 			-o | --output ) shift; OUTPUT="$1" ;;
-			-- ) shift; URL="$1"; break ;;
+			-- ) shift; CONTENT_ID="$1"; break ;;
 			* ) break ;;
 		esac
 		shift
@@ -30,13 +33,13 @@ function parse_args() {
 function read_args_if_not_given() {
 	OK=true
 	
-	if [ "$URL" = "" ]; then
-		echo -n "Lecture URL: "
-		read URL
+	if [ "$CONTENT_ID" = "" ]; then
+		echo -n "Content ID: "
+		read CONTENT_ID
 	fi
 
 	if [ "$TOKEN" = "" ]; then
-		echo -n "TOKEN: "
+		echo -n "Token: "
 		read TOKEN
 	fi
 
@@ -49,8 +52,8 @@ function read_args_if_not_given() {
 function assert_args() {
 	OK=true
 	
-	if [ "$URL" = "" ]; then
-		echo "No url specified."
+	if [ "$CONTENT_ID" = "" ]; then
+		echo "No content ID specified."
 		OK=false
 	fi
 
@@ -70,26 +73,27 @@ function assert_args() {
 }
 
 function usage() {
-	echo "Usage: ./lms-get <url> --token <token> --output <dirname>"
+	echo "Usage: ./lms-get <content id> --token <token> --output <dirname>"
 	exit 1
 }
 
 function parse_origin_ext() {
-	ORIGIN_EXT=$(curl -sS -b "MoodleSession=$TOKEN" $URL | grep "keywords" | grep -oEi "\.[a-zA-Z]+" | awk -F '.' '{print $2}')
-	echo "Origin ext: $ORIGIN_EXT"
+	ORIGIN_EXT=$(curl -sS -b "MoodleSession=$TOKEN" $BASE_URL$CONTENT_ID | grep "img" | grep -oEi "alt=\".*\.[a-zA-z]+\"" | grep -oEi "\.[a-zA-Z0-9]+" | awk -F '.' '{print $2}')
+	echo "Origin extension: $ORIGIN_EXT"
 }
 
 function parse_frame_url() {
-	FRAME_URL=$(curl -sS -b "MoodleSession=$TOKEN" $URL | grep "iframe_document" | grep -oEi "http://[\.a-zA-Z0-9\/\?=-_&]+")
+	FRAME_URL=$(curl -sS -b "MoodleSession=$TOKEN" $BASE_URL$CONTENT_ID | grep "iframe_document" | grep -oEi "http://[\.a-zA-Z0-9\/\?=-_&]+")
+	echo "Frame URL: $FRAME_URL"
 }
 
 function parse_content_id() {
-	CONTENT_ID=$(echo $FRAME_URL | grep -oEi "fn=[a-z0-9]+" | awk -F '=' '{print $2}')
-	echo "Content ID: $CONTENT_ID"
+	CONTENT_TOKEN=$(echo $FRAME_URL | grep -oEi "fn=[a-z0-9]+" | awk -F '=' '{print $2}')
+	echo "Content ID: $CONTENT_TOKEN"
 }
 
 function generate_content_base_url() {
-	CONTENT_BASE_URL="http://cyber.inu.ac.kr/ubion_document/$CONTENT_ID/$CONTENT_ID.files"
+	CONTENT_BASE_URL="http://cyber.inu.ac.kr/ubion_document/$CONTENT_TOKEN/$CONTENT_TOKEN.files"
 }
 
 function download_contents() {
@@ -114,7 +118,7 @@ function get_url() {
 	file_number="$1"
 
 	if [ "$ORIGIN_EXT" = "pptx" ] || [ "$ORIGIN_EXT" = "ppt" ]; then
-		echo "$CONTENT_BASE_URL/$(echo $CONTENT_ID)_$(printf '%05d' $((file_number - 1))).$(get_ext)"
+		echo "$CONTENT_BASE_URL/$(echo $CONTENT_TOKEN)_$(printf '%05d' $((file_number - 1))).$(get_ext)"
 
 	elif [ "$ORIGIN_EXT" = "pdf" ]; then
 		echo "$CONTENT_BASE_URL/$file_number.$(get_ext)"

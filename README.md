@@ -1,5 +1,8 @@
 # lms-get
 
+
+![demo](assets/demo.gif)
+
 이러닝 문서 다운로더
 
 ## 용도
@@ -11,8 +14,8 @@
 ## 사용법
 
 ~~~
-./lms-get <url> --output <directory> --cookie <sessionid>
+./lms-get <url> --token <token> --output <directory>
 ~~~
 
-- `--output`: 문서를 저장할 디렉토리. 없으면 새로 생성됨(`mkdir -p` 사용)
-- `--cookie`: 로그인 세션 id(브라우저에서 `MoodleSession`으로 확인 가능)
+- `--token`: 로그인 토큰 (브라우저에서 `MoodleSession`으로 확인 가능).
+- `--output`: 문서를 저장할 디렉토리. 없으면 새로 생성됨 (`mkdir -p` 사용)
