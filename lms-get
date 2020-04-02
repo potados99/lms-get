@@ -2,7 +2,7 @@
 
 # Args
 URL=""
-COOKIE=""
+TOKEN=""
 OUTPUT=""
 
 # Globals
@@ -13,12 +13,12 @@ CONTENT_BASE_URL=""
 
 function parse_args() {
 	# GNU getopt
-	OPTIONS=$(getopt -o c:o: -l cookie:,output: -- "$@")
+	OPTIONS=$(getopt -o t:o: -l token:,output: -- "$@")
 
 	eval set -- $OPTIONS
 	while true; do
 		case "$1" in
-			-c | --cookie ) shift; COOKIE="$1" ;;
+			-t | --token ) shift; TOKEN="$1" ;;
 			-o | --output ) shift; OUTPUT="$1" ;;
 			-- ) shift; URL="$1"; break ;;
 			* ) break ;;
@@ -35,8 +35,8 @@ function read_args_if_not_given() {
 		read URL
 	fi
 
-	if [ "$COOKIE" = "" ]; then
-		echo -n "Cookie(MoodleSession): "
+	if [ "$TOKEN" = "" ]; then
+		echo -n "TOKEN: "
 		read COOKIE
 	fi
 
@@ -54,8 +54,8 @@ function assert_args() {
 		OK=false
 	fi
 
-	if [ "$COOKIE" = "" ]; then
-		echo "No cookie specified."
+	if [ "$TOKEN" = "" ]; then
+		echo "No token specified."
 		OK=false
 	fi
 
@@ -70,7 +70,7 @@ function assert_args() {
 }
 
 function usage() {
-	echo "Usage: ./lms-get <url> --cookie <sessionid> --output <dirname>"
+	echo "Usage: ./lms-get <url> --token <token> --output <dirname>"
 	exit 1
 }
 
