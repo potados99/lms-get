@@ -37,7 +37,7 @@ function read_args_if_not_given() {
 
 	if [ "$TOKEN" = "" ]; then
 		echo -n "TOKEN: "
-		read COOKIE
+		read TOKEN
 	fi
 
 	if [ "$OUTPUT" = "" ]; then
@@ -75,12 +75,12 @@ function usage() {
 }
 
 function parse_origin_ext() {
-	ORIGIN_EXT=$(curl -sS -b "MoodleSession=$COOKIE" $URL | grep "keywords" | grep -oEi "\.[a-zA-Z]+" | awk -F '.' '{print $2}')
+	ORIGIN_EXT=$(curl -sS -b "MoodleSession=$TOKEN" $URL | grep "keywords" | grep -oEi "\.[a-zA-Z]+" | awk -F '.' '{print $2}')
 	echo "Origin ext: $ORIGIN_EXT"
 }
 
 function parse_frame_url() {
-	FRAME_URL=$(curl -sS -b "MoodleSession=$COOKIE" $URL | grep "iframe_document" | grep -oEi "http://[\.a-zA-Z0-9\/\?=-_&]+")
+	FRAME_URL=$(curl -sS -b "MoodleSession=$TOKEN" $URL | grep "iframe_document" | grep -oEi "http://[\.a-zA-Z0-9\/\?=-_&]+")
 }
 
 function parse_content_id() {
